@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
@@ -49,7 +50,7 @@ func startServer() error {
 	if err != nil {
 		return err
 	}
-
+	log.Printf("Starting server on %s", config.Server.Address)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/add", addHandler)
 	return http.ListenAndServe(config.Server.Address, mux)
