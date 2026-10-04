@@ -11,11 +11,20 @@ API สำหรับรับจำนวนเต็มสองจำนว�
 
 ## เริ่มเซิร์ฟเวอร์
 
+กำหนด address สำหรับฟัง request ใน `config.yml`:
+
+```yaml
+server:
+  address: ":8080"
+```
+
+เปลี่ยน `address` ได้ เช่น `":9090"` เพื่อใช้พอร์ตอื่น จากนั้นรัน:
+
 ```powershell
 go run .
 ```
 
-เซิร์ฟเวอร์ทำงานที่ `http://localhost:8080` โดย endpoint คือ `POST /add`
+เซิร์ฟเวอร์ทำงานที่ address ที่กำหนด (ค่าเริ่มต้นคือ `http://localhost:8080`) โดย endpoint คือ `POST /add`
 
 ตัวอย่าง request:
 

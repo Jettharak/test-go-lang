@@ -4,9 +4,50 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
+
+func TestLoadServerConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+		want    string
+		wantErr bool
+	}{
+		{name: "valid config", content: "server:\n  address: \":9090\"\n", want: ":9090"},
+		{name: "empty address", content: "server:\n  address: \"\"\n", wantErr: true},
+		{name: "unknown field", content: "server:\n  address: \":9090\"\n  extra: true\n", wantErr: true},
+		{name: "malformed YAML", content: "server: [\n", wantErr: true},
+		{name: "multiple documents", content: "server:\n  address: \":9090\"\n---\nserver:\n  address: \":9091\"\n", wantErr: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.yml")
+			if err := os.WriteFile(path, []byte(test.content), 0600); err != nil {
+				t.Fatal(err)
+			}
+
+			config, err := loadServerConfig(path)
+			if (err != nil) != test.wantErr {
+				t.Fatalf("loadServerConfig() error = %v, wantErr %t", err, test.wantErr)
+			}
+			if err == nil && config.Server.Address != test.want {
+				t.Fatalf("address = %q, want %q", config.Server.Address, test.want)
+			}
+		})
+	}
+}
+
+func TestLoadServerConfigMissingFile(t *testing.T) {
+	_, err := loadServerConfig(filepath.Join(t.TempDir(), "missing.yml"))
+	if err == nil {
+		t.Fatal("loadServerConfig() error = nil, want an error")
+	}
+}
 
 func TestAdd(t *testing.T) {
 	tests := []struct {
